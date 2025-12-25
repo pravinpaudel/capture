@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" /> <!--If required = true then it cannot be installed on the devices that don't have camera. -->
+
+    <uses-permission android:name="android.permission.CAMERA" /> <!-- My app needs camera permission -->
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Capture">
+
+        <!--My app wants to safely share files (like photos) with other apps — such as the camera app — using a secure system called FileProvider.
+         Without this block, your camera code will crash, because Android will refuse to let the camera app write into your file.-->
+        <provider
+            android:authorities="${applicationId}.fileprovider"
+            android:name="androidx.core.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true"> <!--I allow temporary permission to be given to other apps for specific files(only for this specific URI). -->
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" /> <!-- Look inside res/xml/file_paths.xml to see which folders my app is allowed to share. -->
+        </provider>
+
+
+<!--        An activity is a single screen in your app. Think of it like a page in a book. This tells Android:-->
+<!--        “The screen I want to register is the class called MainActivity.”-->
+        <activity android:name=".MainActivity"
+            android:exported="true"> <!-- If other apps are allowed to open this activity.-->
+
+<!--         An intent filter tells Android: “Here is how this activity should be used.” Inside it, you describe what kind of actions this activity responds to.-->
+            <intent-filter>
+<!--                This is the main entry point of the app.-->
+                <action android:name="android.intent.action.MAIN" />
+<!--             This makes your app appear in the emulator’s app drawer with an icon.-->
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>
