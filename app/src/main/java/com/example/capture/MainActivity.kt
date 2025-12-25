@@ -1,11 +1,11 @@
 package com.example.capture
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.widget.Button
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -27,11 +27,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         photoView = findViewById(R.id.image_preview)
-        val captureButton: Button = findViewById(R.id.capture_button)
 
-//        captureButton.setOnClickListener {
-//           checkCameraPermissionAndCapture()
-//        }
+        // Launch camera directly when app opens
         checkCameraPermissionAndCapture()
     }
 
@@ -73,6 +70,10 @@ class MainActivity : AppCompatActivity() {
     private val takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
             photoView.setImageURI(photoUri)
+            // Navigate to event form with the captured photo
+            val intent = Intent(this, EventFormActivity::class.java)
+            intent.putExtra("photo_uri", photoUri)
+            startActivity(intent)
         } else {
             // Handle failure to capture photo
             // You can show a message to the user or disable the feature

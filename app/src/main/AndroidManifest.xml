@@ -32,18 +32,23 @@
 
 
 <!--        An activity is a single screen in your app. Think of it like a page in a book. This tells Android:-->
-<!--        “The screen I want to register is the class called MainActivity.”-->
+<!--        "The screen I want to register is the class called MainActivity."-->
         <activity android:name=".MainActivity"
             android:exported="true"> <!-- If other apps are allowed to open this activity.-->
 
-<!--         An intent filter tells Android: “Here is how this activity should be used.” Inside it, you describe what kind of actions this activity responds to.-->
+<!--         An intent filter tells Android: "Here is how this activity should be used." Inside it, you describe what kind of actions this activity responds to.-->
             <intent-filter>
 <!--                This is the main entry point of the app.-->
                 <action android:name="android.intent.action.MAIN" />
-<!--             This makes your app appear in the emulator’s app drawer with an icon.-->
+<!--             This makes your app appear in the emulator's app drawer with an icon.-->
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Event Form Activity - Screen for entering event details -->
+        <activity android:name=".EventFormActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
 
     </application>
 
