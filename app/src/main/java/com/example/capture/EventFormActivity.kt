@@ -59,6 +59,20 @@ class EventFormActivity : AppCompatActivity() {
             imagePreview.setImageURI(it)
         }
 
+        // Get extracted event data from intent
+        val extractedTitle = intent.getStringExtra("event_title")
+        val extractedDate = intent.getStringExtra("event_date")
+        val extractedTime = intent.getStringExtra("event_time")
+        val extractedLocation = intent.getStringExtra("event_location")
+        val extractedDescription = intent.getStringExtra("event_description")
+
+        // Pre-populate form fields with extracted data
+        extractedTitle?.let { eventTitle.setText(it) }
+        extractedDate?.let { eventDate.setText(it) }
+        extractedTime?.let { eventStartTime.setText(it) }
+        extractedLocation?.let { eventLocation.setText(it) }
+        extractedDescription?.let { eventDescription.setText(it) }
+
         // Setup listeners
         setupListeners()
 

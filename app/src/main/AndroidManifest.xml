@@ -7,6 +7,9 @@
         android:required="false" /> <!--If required = true then it cannot be installed on the devices that don't have camera. -->
 
     <uses-permission android:name="android.permission.CAMERA" /> <!-- My app needs camera permission -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" /> <!-- For Android 12 and below -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" /> <!-- For Android 13+ -->
 
     <application
         android:allowBackup="true"
