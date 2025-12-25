@@ -41,17 +41,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-
-    // CameraX - use BOM to keep versions consistent
-    implementation(platform("androidx.camera:camera-bom:1.1.0"))
-    implementation("androidx.camera:camera-core")
-    implementation("androidx.camera:camera-camera2")
-    implementation("androidx.camera:camera-lifecycle")
-    implementation("androidx.camera:camera-view") // PreviewView
-
-    // lifecycle runtime (convenience)
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
