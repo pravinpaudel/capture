@@ -2,11 +2,10 @@ package com.example.capture
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.CalendarContract
 import android.view.View
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
@@ -19,6 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class EventFormActivity : AppCompatActivity() {
+    private val calendarFormatter = CalendarFormatter()
 
     private lateinit var imagePreview: ImageView
     private lateinit var eventTitle: TextInputEditText
@@ -62,59 +62,61 @@ class EventFormActivity : AppCompatActivity() {
         // Get extracted event data from intent
         val extractedTitle = intent.getStringExtra("event_title")
         val extractedDate = intent.getStringExtra("event_date")
-        val extractedTime = intent.getStringExtra("event_time")?: ""
+        val extractedTime = intent.getStringExtra("event_time")
         val extractedLocation = intent.getStringExtra("event_location")
         val extractedDescription = intent.getStringExtra("event_description")
 
-        // Split by "-" or "to"
-        val parts = extractedTime.split(Regex("\\s*(-|to)\\s*", RegexOption.IGNORE_CASE))
-        val startRaw = parts.getOrNull(0)?.trim()
-        val endRaw = parts.getOrNull(1)?.trim()
+        val dateTimeNormalizer = DateTimeNormalizer()
+        // Normalize date/time to structured format
+        val structuredDateTime = dateTimeNormalizer.normalize(extractedDate, extractedTime)
 
-        // Detect AM/PM from the original string
-        val ampm = when {
-            extractedTime.contains("am", ignoreCase = true) -> "AM"
-            extractedTime.contains("pm", ignoreCase = true) -> "PM"
-            else -> null
-        }
-
-        // Normalise start time
-        val start_time = if(startRaw != null && ampm != null &&
-            !startRaw.contains("am", ignoreCase = true) &&
-            !startRaw.contains("pm", ignoreCase = true)
-            ) {
-            "$startRaw $ampm"
-        } else startRaw
-
-        // Normalise end time
-        val end_time = if(endRaw != null && ampm != null &&
-            !endRaw.contains("am", ignoreCase = true) &&
-            !endRaw.contains("pm", ignoreCase = true)
-        ) {
-            "$endRaw $ampm"
-        } else endRaw
-
-        // Pre-populate form fields with extracted data
+        // Pre-populate form fields with normalized data
         extractedTitle?.let { eventTitle.setText(it) }
-        extractedDate?.let { eventDate.setText(it) }
-        extractedTime?.let { eventStartTime.setText(start_time) }
-        extractedTime?.let { eventEndTime.setText(end_time) }
         extractedLocation?.let { eventLocation.setText(it) }
         extractedDescription?.let { eventDescription.setText(it) }
+
+        // Populate date and time from structured data
+        if (structuredDateTime != null) {
+            // Set date
+            selectedDate.set(
+                structuredDateTime.year ?: Calendar.getInstance().get(Calendar.YEAR),
+                (structuredDateTime.month ?: 1) - 1,  // Calendar.MONTH is 0-based
+                structuredDateTime.day ?: 1
+            )
+            updateDateDisplay()
+
+            // Set times if available
+            if (!structuredDateTime.allDay && structuredDateTime.hour != null) {
+                // Set start time
+                startTime.set(Calendar.HOUR_OF_DAY, structuredDateTime.hour)
+                startTime.set(Calendar.MINUTE, structuredDateTime.minute ?: 0)
+                startTime.set(Calendar.YEAR, structuredDateTime.year ?: Calendar.getInstance().get(Calendar.YEAR))
+                startTime.set(Calendar.MONTH, (structuredDateTime.month ?: 1) - 1)
+                startTime.set(Calendar.DAY_OF_MONTH, structuredDateTime.day ?: 1)
+                updateTimeDisplay(true)
+
+                // Set end time (if available, otherwise default to 1 hour after start)
+                if (structuredDateTime.endDateTime != null) {
+                    endTime.timeInMillis = structuredDateTime.endDateTime
+                } else {
+                    endTime.timeInMillis = startTime.timeInMillis + 3600000 // +1 hour
+                }
+                updateTimeDisplay(false)
+            } else {
+                // All-day event or no time specified - set default times
+                allDaySwitch.isChecked = structuredDateTime.allDay
+                initializeDefaultTimes()
+            }
+        } else {
+            // No valid date found - initialize defaults
+            initializeDefaultTimes()
+        }
 
         // Setup listeners
         setupListeners()
 
         // Setup reminder dropdown
         setupReminderDropdown()
-
-        if(extractedTime.equals("")) {
-            // Initialize default times (1 hour from now)
-            startTime.add(Calendar.HOUR_OF_DAY, 1)
-            startTime.set(Calendar.MINUTE, 0)
-            endTime.add(Calendar.HOUR_OF_DAY, 2)
-            endTime.set(Calendar.MINUTE, 0)
-        }
     }
 
     private fun initViews() {
@@ -175,6 +177,14 @@ class EventFormActivity : AppCompatActivity() {
         cancelButton.setOnClickListener {
             finish()
         }
+    }
+
+    private fun initializeDefaultTimes() {
+        // Initialize default times (1 hour from now)
+        startTime.add(Calendar.HOUR_OF_DAY, 1)
+        startTime.set(Calendar.MINUTE, 0)
+        endTime.add(Calendar.HOUR_OF_DAY, 2)
+        endTime.set(Calendar.MINUTE, 0)
     }
 
     private fun setupReminderDropdown() {
@@ -261,70 +271,71 @@ class EventFormActivity : AppCompatActivity() {
         }
 
         try {
-            // Create calendar intent
-            val intent = Intent(Intent.ACTION_INSERT).apply { // Tells android, I want to insert something new
-                data = CalendarContract.Events.CONTENT_URI // Tells android, I want to insert a calender event. Open the Calendar app and prepare a new event form
-                putExtra(CalendarContract.Events.TITLE, eventTitle.text.toString())
-                putExtra(CalendarContract.Events.DESCRIPTION, eventDescription.text.toString())
-                putExtra(CalendarContract.Events.EVENT_LOCATION, eventLocation.text.toString())
-
-                // Set date and time (requires in milliseconds)
-                val startMillis: Long
-                val endMillis: Long
-
-                if (allDaySwitch.isChecked) {
-                    putExtra(CalendarContract.Events.ALL_DAY, true)
-                    startMillis = selectedDate.timeInMillis
-                    endMillis = selectedDate.timeInMillis + 24 * 60 * 60 * 1000 // Next day
-                } else {
-                    // Combine date with time
-                    val startDateTime = Calendar.getInstance().apply {
-                        set(Calendar.YEAR, selectedDate.get(Calendar.YEAR))
-                        set(Calendar.MONTH, selectedDate.get(Calendar.MONTH))
-                        set(Calendar.DAY_OF_MONTH, selectedDate.get(Calendar.DAY_OF_MONTH))
-                        set(Calendar.HOUR_OF_DAY, startTime.get(Calendar.HOUR_OF_DAY))
-                        set(Calendar.MINUTE, startTime.get(Calendar.MINUTE))
-                    }
-
-                    val endDateTime = Calendar.getInstance().apply {
-                        set(Calendar.YEAR, selectedDate.get(Calendar.YEAR))
-                        set(Calendar.MONTH, selectedDate.get(Calendar.MONTH))
-                        set(Calendar.DAY_OF_MONTH, selectedDate.get(Calendar.DAY_OF_MONTH))
-                        set(Calendar.HOUR_OF_DAY, endTime.get(Calendar.HOUR_OF_DAY))
-                        set(Calendar.MINUTE, endTime.get(Calendar.MINUTE))
-                    }
-
-                    startMillis = startDateTime.timeInMillis
-                    endMillis = endDateTime.timeInMillis
+            // Build structured date/time
+            val structuredDateTime = if (allDaySwitch.isChecked) {
+                // All-day event
+                StructuredDateTime(
+                    startDateTime = selectedDate.timeInMillis,
+                    endDateTime = selectedDate.timeInMillis + 24 * 60 * 60 * 1000,
+                    allDay = true,
+                    year = selectedDate.get(Calendar.YEAR),
+                    month = selectedDate.get(Calendar.MONTH) + 1,
+                    day = selectedDate.get(Calendar.DAY_OF_MONTH),
+                    hour = null,
+                    minute = null
+                )
+            } else {
+                // Event with specific time
+                val startDateTime = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, selectedDate.get(Calendar.YEAR))
+                    set(Calendar.MONTH, selectedDate.get(Calendar.MONTH))
+                    set(Calendar.DAY_OF_MONTH, selectedDate.get(Calendar.DAY_OF_MONTH))
+                    set(Calendar.HOUR_OF_DAY, startTime.get(Calendar.HOUR_OF_DAY))
+                    set(Calendar.MINUTE, startTime.get(Calendar.MINUTE))
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
                 }
 
-                putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, startMillis)
-                putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endMillis)
-
-                // Add reminder if selected
-                val reminderText = eventReminder.text.toString()
-                val reminderMinutes = when (reminderText) {
-                    "At time of event" -> 0
-                    "5 minutes before" -> 5
-                    "10 minutes before" -> 10
-                    "15 minutes before" -> 15
-                    "30 minutes before" -> 30
-                    "1 hour before" -> 60
-                    "1 day before" -> 1440
-                    else -> -1
+                val endDateTime = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, selectedDate.get(Calendar.YEAR))
+                    set(Calendar.MONTH, selectedDate.get(Calendar.MONTH))
+                    set(Calendar.DAY_OF_MONTH, selectedDate.get(Calendar.DAY_OF_MONTH))
+                    set(Calendar.HOUR_OF_DAY, endTime.get(Calendar.HOUR_OF_DAY))
+                    set(Calendar.MINUTE, endTime.get(Calendar.MINUTE))
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
                 }
 
-                if (reminderMinutes >= 0) {
-                    putExtra(CalendarContract.Reminders.MINUTES, reminderMinutes)
-                    putExtra(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT)
-                }
+                StructuredDateTime(
+                    startDateTime = startDateTime.timeInMillis,
+                    endDateTime = endDateTime.timeInMillis,
+                    allDay = false,
+                    year = selectedDate.get(Calendar.YEAR),
+                    month = selectedDate.get(Calendar.MONTH) + 1,
+                    day = selectedDate.get(Calendar.DAY_OF_MONTH),
+                    hour = startTime.get(Calendar.HOUR_OF_DAY),
+                    minute = startTime.get(Calendar.MINUTE)
+                )
             }
+
+            // Parse reminder
+            val reminderMinutes = calendarFormatter.parseReminderText(eventReminder.text.toString())
+
+            // Create calendar intent using formatter
+            val intent = calendarFormatter.createCalendarIntent(
+                title = eventTitle.text.toString(),
+                description = eventDescription.text.toString(),
+                location = eventLocation.text.toString(),
+                structuredDateTime = structuredDateTime,
+                reminderMinutes = reminderMinutes
+            )
 
             startActivity(intent)
             Toast.makeText(this, "Opening calendar app...", Toast.LENGTH_SHORT).show()
             finish()
 
         } catch (e: Exception) {
+            Log.e("EventFormActivity", "Error saving event", e)
             Toast.makeText(this, "Error saving event: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }

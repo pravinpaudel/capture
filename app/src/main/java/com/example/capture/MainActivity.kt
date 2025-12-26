@@ -21,7 +21,6 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -311,7 +310,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigateToEventForm(photoUri: Uri?, eventData: EventData) {
+    private fun navigateToEventForm(photoUri: Uri?, eventData: RawEventData) {
         val intent = Intent(this, EventFormActivity::class.java)
         intent.putExtra("photo_uri", photoUri)
         intent.putExtra("event_title", eventData.title)

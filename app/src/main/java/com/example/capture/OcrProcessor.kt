@@ -93,7 +93,7 @@ class OcrProcessor(private val context: Context) {
         textRecognizer.close()
     }
 
-    suspend fun extractAndParseEvent(imageUri: Uri): Result<EventData> {
+    suspend fun extractAndParseEvent(imageUri: Uri): Result<RawEventData> {
         return try {
             val extractedTextBlock = extractText(imageUri)
 
