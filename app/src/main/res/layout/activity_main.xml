@@ -1,23 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="16dp"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="false">
 
-    <Button
-        android:id="@+id/capture_button"
+<!--    android:background="#000000" -->
+
+    <!-- Camera Preview (full screen) -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/camera_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:scaleType="fillCenter"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Center Reticle/Targeting Frame -->
+    <ImageView
+        android:id="@+id/camera_reticle"
+        android:layout_width="300dp"
+        android:layout_height="380dp"
+        android:contentDescription="Camera targeting frame"
+        android:src="@drawable/camera_reticle_corners"
+        android:alpha="0.8"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.35" />
+
+    <!-- Gallery Import Button (bottom-left) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/gallery_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Capture Photo" />
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="40dp"
+        android:contentDescription="Import from gallery"
+        android:src="@drawable/ic_gallery"
+        app:tint="#FFFFFF"
+        app:fabSize="normal"
+        app:backgroundTint="#3D3D3D"
+        app:elevation="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <ImageView
-        android:id="@+id/image_preview"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:contentDescription="Photo preview"
-        android:scaleType="centerCrop" />
+    <!-- Capture Button (bottom center) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/capture_button"
+        android:layout_width="88dp"
+        android:layout_height="88dp"
+        android:contentDescription="Capture photo"
+        android:src="@drawable/ic_camera"
+        app:tint="#2C2C2C"
+        app:fabCustomSize="88dp"
+        app:maxImageSize="48dp"
+        app:backgroundTint="#FFFFFF"
+        app:borderWidth="0dp"
+        app:elevation="8dp"
+        android:layout_marginBottom="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
