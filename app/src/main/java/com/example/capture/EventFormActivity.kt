@@ -62,14 +62,43 @@ class EventFormActivity : AppCompatActivity() {
         // Get extracted event data from intent
         val extractedTitle = intent.getStringExtra("event_title")
         val extractedDate = intent.getStringExtra("event_date")
-        val extractedTime = intent.getStringExtra("event_time")
+        val extractedTime = intent.getStringExtra("event_time")?: ""
         val extractedLocation = intent.getStringExtra("event_location")
         val extractedDescription = intent.getStringExtra("event_description")
+
+        // Split by "-" or "to"
+        val parts = extractedTime.split(Regex("\\s*(-|to)\\s*", RegexOption.IGNORE_CASE))
+        val startRaw = parts.getOrNull(0)?.trim()
+        val endRaw = parts.getOrNull(1)?.trim()
+
+        // Detect AM/PM from the original string
+        val ampm = when {
+            extractedTime.contains("am", ignoreCase = true) -> "AM"
+            extractedTime.contains("pm", ignoreCase = true) -> "PM"
+            else -> null
+        }
+
+        // Normalise start time
+        val start_time = if(startRaw != null && ampm != null &&
+            !startRaw.contains("am", ignoreCase = true) &&
+            !startRaw.contains("pm", ignoreCase = true)
+            ) {
+            "$startRaw $ampm"
+        } else startRaw
+
+        // Normalise end time
+        val end_time = if(endRaw != null && ampm != null &&
+            !endRaw.contains("am", ignoreCase = true) &&
+            !endRaw.contains("pm", ignoreCase = true)
+        ) {
+            "$endRaw $ampm"
+        } else endRaw
 
         // Pre-populate form fields with extracted data
         extractedTitle?.let { eventTitle.setText(it) }
         extractedDate?.let { eventDate.setText(it) }
-        extractedTime?.let { eventStartTime.setText(it) }
+        extractedTime?.let { eventStartTime.setText(start_time) }
+        extractedTime?.let { eventEndTime.setText(end_time) }
         extractedLocation?.let { eventLocation.setText(it) }
         extractedDescription?.let { eventDescription.setText(it) }
 
@@ -79,11 +108,13 @@ class EventFormActivity : AppCompatActivity() {
         // Setup reminder dropdown
         setupReminderDropdown()
 
-        // Initialize default times (1 hour from now)
-        startTime.add(Calendar.HOUR_OF_DAY, 1)
-        startTime.set(Calendar.MINUTE, 0)
-        endTime.add(Calendar.HOUR_OF_DAY, 2)
-        endTime.set(Calendar.MINUTE, 0)
+        if(extractedTime.equals("")) {
+            // Initialize default times (1 hour from now)
+            startTime.add(Calendar.HOUR_OF_DAY, 1)
+            startTime.set(Calendar.MINUTE, 0)
+            endTime.add(Calendar.HOUR_OF_DAY, 2)
+            endTime.set(Calendar.MINUTE, 0)
+        }
     }
 
     private fun initViews() {

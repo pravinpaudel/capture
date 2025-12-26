@@ -18,12 +18,15 @@ class EventParser {
     companion object {
         // Date patterns
         private val DATE_PATTERNS = listOf(
-            Pattern.compile("\\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \\d{1,2},? \\d{4}\\b", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("\\b\\d{1,2}(st|nd|rd|th) (?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\\b", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("\\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \\d{1,2}(?:,?\\\\s*\\\\d{4})?", Pattern.CASE_INSENSITIVE),
             Pattern.compile("\\b\\d{1,2}[/-]\\d{1,2}[/-]\\d{2,4}\\b"),
             Pattern.compile("\\b\\d{4}[/-]\\d{1,2}[/-]\\d{1,2}\\b"),
-            Pattern.compile("\\b(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),? (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \\d{1,2}\\b", Pattern.CASE_INSENSITIVE)
-        )
-
+            Pattern.compile("\\b(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),? (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \\d{1,2}\\b", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("\\b\\d{1,2}(st|nd|rd|th)\\b", Pattern.CASE_INSENSITIVE), // ordinal only (1st, 2nd, 3rd, 10th)
+            Pattern.compile( "\\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \\d{1,2}(st|nd|rd|th)\\b", Pattern.CASE_INSENSITIVE ), // month + ordinal (Jan 21st)
+            Pattern.compile( "\\b\\d{1,2}(st|nd|rd|th) (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\b", Pattern.CASE_INSENSITIVE ), // ordinal + month (21st JanPattern.compile(
+            )
         // Time patterns
         private val TIME_PATTERNS = listOf(
             Pattern.compile("\\b\\d{1,2}:\\d{2}\\s*(?:AM|PM)\\b", Pattern.CASE_INSENSITIVE),
@@ -41,7 +44,7 @@ class EventParser {
         val lines = blocks.flatMap { it.lines.toList() }.map { it.text }.filter { it.isNotBlank() }
         val text = blocks.joinToString("\n") { it.text }
         val title = extractTitle(blocks)
-        val date = extractDate(blocks)
+        val date = extractDate(text)
         val time = extractTime(blocks)
 
         val location = extractLocation(text, lines)
@@ -71,24 +74,26 @@ class EventParser {
         return candidates.maxByOrNull { it.length }?.trim()
     }
 
-    private fun extractDate(blocks: List<Text.TextBlock>): String? {
-        val candidates = mutableListOf<Pair<String, Int>>() // Text + score
+    private fun extractDate(text: String): String? {
+//        val candidates = mutableListOf<Pair<String, Int>>() // Text + score
 
-        for (block in blocks) {
-            val text = block.text
+//        for (block in blocks) {
+//            val text = block.text
             for(pattern in DATE_PATTERNS) {
                 val matcher = pattern.matcher(text) // Create matcher object
                 if(matcher.find()) { // .find() return boolean
                     val date = matcher.group().trim() // Returns the exact text that matches the pattern
+                    return date
                     // Score based on bounding box height (font size)
-                    val score = block.boundingBox?.height() ?: 0
-
-                    candidates.add(date to score)
+//                    val score = block.boundingBox?.height() ?: 0
+//
+//                    candidates.add(date to score)
                 }
             }
-        }
-        // Return the date with highest score
-        return candidates.maxByOrNull { it.second }?.first
+//        }
+        return null
+//        // Return the date with highest score
+//        return candidates.maxByOrNull { it.second }?.first
 
     }
 
