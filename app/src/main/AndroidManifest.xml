@@ -53,6 +53,12 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
+        <activity
+            android:name=".CropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Capture"
+            android:exported="false" />
+
     </application>
 
 </manifest>
