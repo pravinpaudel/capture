@@ -1,5 +1,6 @@
 package com.example.capture
 
+import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -83,7 +84,9 @@ class DateTimeNormalizer {
             calendar.set(Calendar.MINUTE, timeComponents.endMinute)
             calendar.timeInMillis
         } else null
-        
+
+        Log.d("DateTimeNormalizer", "Normalized date: $dateComponents, time: $timeComponents")
+
         return StructuredDateTime(
             startDateTime = startTimestamp,
             endDateTime = endTimestamp,

@@ -82,7 +82,7 @@ class EventParser {
         val time = extractTime(blocks)
 
         val location = extractLocation(text, lines)
-        val description = extractDescription(text, title, date, time, location)
+        val description = extractDescription(text)
         Log.d(
             "EventParser",
             "Parsed event: Title: $title, Date: $date, Time: $time, Location: $location, Description: $description"
@@ -176,25 +176,19 @@ class EventParser {
         return null
     }
 
-    private fun extractDescription(
-        text: String,
-        title: String?,
-        date: String?,
-        time: String?,
-        location: String?
-    ): String? {
+    private fun extractDescription(text: String): String? {
         var description = text
 
-        // Remove extracted elements from description
-        title?.let { description = description.replace(it, "", ignoreCase = true) }
-        date?.let { description = description.replace(it, "", ignoreCase = true) }
-        time?.let { description = description.replace(it, "", ignoreCase = true) }
-        location?.let { description = description.replace(it, "", ignoreCase = true) }
-
-        // Remove location keywords
-        LOCATION_KEYWORDS.forEach { keyword ->
-            description = description.replace(keyword, "", ignoreCase = true)
-        }
+//        // Remove extracted elements from description
+//        title?.let { description = description.replace(it, "", ignoreCase = true) }
+//        date?.let { description = description.replace(it, "", ignoreCase = true) }
+//        time?.let { description = description.replace(it, "", ignoreCase = true) }
+//        location?.let { description = description.replace(it, "", ignoreCase = true) }
+//
+//        // Remove location keywords
+//        LOCATION_KEYWORDS.forEach { keyword ->
+//            description = description.replace(keyword, "", ignoreCase = true)
+//        }
 
 
         // Clean up: remove extra whitespace and empty lines
