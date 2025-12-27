@@ -47,7 +47,7 @@ class EventFormActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.event_form)
+        setContentView(R.layout.event_form_temp)
 
         // Initialize views
         initViews()
