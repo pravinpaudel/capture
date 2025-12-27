@@ -1,55 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@android:color/black">
 
-    <!-- Toolbar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="#00160A0A"
-        android:elevation="4dp"
-        app:title="Crop Image"
-        app:titleTextColor="@android:color/white" />
-
-    <!-- Crop Image View -->
+    <!-- Crop Image View - With padding for easier cropping -->
     <com.canhub.cropper.CropImageView
         android:id="@+id/cropImageView"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        app:cropGuidelines="on"
-        app:cropShape="rectangle" />
+        android:layout_margin="24dp"
+        app:cropGuidelines="onTouch"
+        app:cropShape="rectangle"
+        app:cropBorderLineColor="@color/white"
+        app:cropBorderCornerColor="@color/white"
+        app:cropGuidelinesColor="#88FFFFFF"
+        app:cropBorderLineThickness="3dp"
+        app:cropBorderCornerThickness="5dp"
+        app:cropBorderCornerLength="24dp"
+        app:cropBackgroundColor="#AA000000"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomButtonsContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Action Buttons -->
+    <!-- Bottom Buttons Container -->
     <LinearLayout
+        android:id="@+id/bottomButtonsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center">
+        android:background="#DD000000"
+        android:padding="20dp"
+        android:paddingBottom="32dp"
+        android:gravity="center"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <Button
+        <!-- Cancel Button -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancel"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_weight="1"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="12dp"
             android:text="Cancel"
-            style="@style/Widget.Material3.Button.OutlinedButton" />
+            android:textSize="16sp"
+            android:textColor="@color/white"
+            android:textAllCaps="false"
+            app:cornerRadius="12dp"
+            app:strokeColor="@color/white"
+            app:strokeWidth="2dp"
+            app:backgroundTint="@android:color/transparent"
+            app:rippleColor="#40FFFFFF"
+            app:icon="@android:drawable/ic_menu_close_clear_cancel"
+            app:iconTint="@color/white"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp" />
 
-        <Button
+        <!-- Add Event Button -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCrop"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="Crop &amp; Continue" />
+            android:layout_marginStart="12dp"
+            android:text="Add Event"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textAllCaps="false"
+            app:cornerRadius="12dp"
+            app:backgroundTint="@color/white"
+            app:rippleColor="#40000000"
+            app:icon="@android:drawable/ic_menu_add"
+            app:iconTint="@color/black"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            android:elevation="4dp" />
 
     </LinearLayout>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

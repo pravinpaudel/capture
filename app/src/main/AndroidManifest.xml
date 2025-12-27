@@ -37,7 +37,8 @@
 <!--        An activity is a single screen in your app. Think of it like a page in a book. This tells Android:-->
 <!--        "The screen I want to register is the class called MainActivity."-->
         <activity android:name=".MainActivity"
-            android:exported="true"> <!-- If other apps are allowed to open this activity.-->
+            android:exported="true"
+            android:theme="@style/Theme.Capture"> <!-- If other apps are allowed to open this activity.-->
 
 <!--         An intent filter tells Android: "Here is how this activity should be used." Inside it, you describe what kind of actions this activity responds to.-->
             <intent-filter>
