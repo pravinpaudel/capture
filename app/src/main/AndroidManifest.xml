@@ -52,6 +52,7 @@
         <!-- Event Form Activity - Screen for entering event details -->
         <activity android:name=".EventFormActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".MainActivity" />
 
         <activity
