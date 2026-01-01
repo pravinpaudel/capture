@@ -1,4 +1,4 @@
-# Capture - Smart Event Calendar App
+# Snapture - Smart Event Calendar App
 
 An intelligent Android app that captures event details from images using OCR (Optical Character Recognition) and automatically creates calendar events.
 
