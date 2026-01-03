@@ -65,7 +65,8 @@
             android:textColor="#F44336"
             android:textAllCaps="false"
             style="@style/Widget.MaterialComponents.Button.TextButton"
-            app:rippleColor="#40F44336" />
+            app:rippleColor="#40F44336"
+            app:cornerRadius="8dp" />
 
         <!-- Add Event Button -->
         <com.google.android.material.button.MaterialButton
@@ -78,7 +79,7 @@
             android:minWidth="120dp"
             style="@style/Widget.MaterialComponents.Button"
             android:backgroundTint="?attr/colorPrimary"
-            app:cornerRadius="20dp" />
+            app:cornerRadius="8dp" />
 
     </LinearLayout>
 
