@@ -8,13 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
 /**
- * Handles runtime permission requests for camera and storage access.
+ * Handles runtime permission requests for camera, storage, and calendar access.
  * Simplifies permission management by encapsulating permission logic and Activity Result API.
  */
 class PermissionHandler(private val activity: AppCompatActivity) {
 
     private var cameraPermissionCallback: (() -> Unit)? = null
     private var storagePermissionCallback: (() -> Unit)? = null
+    private var calendarPermissionCallback: (() -> Unit)? = null
     private var permissionDeniedCallback: ((String) -> Unit)? = null
 
     private val cameraPermissionLauncher: ActivityResultLauncher<String> =
@@ -32,6 +33,16 @@ class PermissionHandler(private val activity: AppCompatActivity) {
                 storagePermissionCallback?.invoke()
             } else {
                 permissionDeniedCallback?.invoke("Storage permission is required to select images")
+            }
+        }
+    
+    private val calendarPermissionsLauncher: ActivityResultLauncher<Array<String>> =
+        activity.registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val allGranted = permissions.all { it.value }
+            if (allGranted) {
+                calendarPermissionCallback?.invoke()
+            } else {
+                permissionDeniedCallback?.invoke("Calendar permissions are required to save events")
             }
         }
 
@@ -96,6 +107,44 @@ class PermissionHandler(private val activity: AppCompatActivity) {
             Manifest.permission.READ_MEDIA_IMAGES
         } else {
             Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+    }
+
+    /**
+     * Check calendar permissions and request if needed.
+     * Requests both READ_CALENDAR and WRITE_CALENDAR permissions.
+     * @param onGranted Callback when both permissions are granted
+     * @param onDenied Optional callback when permission is denied
+     */
+    fun checkCalendarPermissions(
+        onGranted: () -> Unit,
+        onDenied: ((String) -> Unit)? = null
+    ) {
+        calendarPermissionCallback = onGranted
+        permissionDeniedCallback = onDenied
+
+        val readGranted = ContextCompat.checkSelfPermission(
+            activity,
+            Manifest.permission.READ_CALENDAR
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val writeGranted = ContextCompat.checkSelfPermission(
+            activity,
+            Manifest.permission.WRITE_CALENDAR
+        ) == PackageManager.PERMISSION_GRANTED
+
+        when {
+            readGranted && writeGranted -> {
+                onGranted()
+            }
+            else -> {
+                calendarPermissionsLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.READ_CALENDAR,
+                        Manifest.permission.WRITE_CALENDAR
+                    )
+                )
+            }
         }
     }
 }

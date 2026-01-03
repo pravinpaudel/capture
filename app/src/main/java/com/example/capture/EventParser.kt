@@ -132,14 +132,14 @@ class EventParser {
             block.boundingBox?.height() ?: 0
         }
 
-        Log.d("EventParser", "Sorted blocks: ${sortedBlocks.map { it.text + ", Height: " + it.boundingBox?.height() }}")
+//        Log.d("EventParser", "Sorted blocks: ${sortedBlocks.map { it.text + ", Height: " + it.boundingBox?.height() }}")
 
         // Title is likely in first 1-3 lines
         // Prioritize: all caps, centered text, top position, and appropriate length
         val candidateBlocks = sortedBlocks.take(3).filter { it.text.length > 3 }
         if (candidateBlocks.isEmpty()) return null
 
-        Log.d("EventParser", "Candidate blocks: ${candidateBlocks.map { it.text }}")
+//        Log.d("EventParser", "Candidate blocks: ${candidateBlocks.map { it.text }}")
 
         // Get max height for font size comparison
         val maxHeight = sortedBlocks.firstOrNull()?.boundingBox?.height() ?: 1

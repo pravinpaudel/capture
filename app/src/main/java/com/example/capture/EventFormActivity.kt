@@ -1,7 +1,9 @@
 package com.example.capture
 
+import android.Manifest
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -10,8 +12,13 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.google.android.material.chip.Chip
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import java.text.SimpleDateFormat
@@ -19,6 +26,7 @@ import java.util.*
 
 class EventFormActivity : AppCompatActivity() {
     private val calendarFormatter = CalendarFormatter()
+    private lateinit var calendarHelper: CalendarHelper
 
     private lateinit var imagePreview: ImageView
     private lateinit var eventTitle: TextInputEditText
@@ -29,8 +37,16 @@ class EventFormActivity : AppCompatActivity() {
     private lateinit var eventEndTime: TextInputEditText
     private lateinit var allDaySwitch: SwitchMaterial
     private lateinit var eventReminder: AutoCompleteTextView
+    private lateinit var remindersContainer: LinearLayout
     private lateinit var saveButton: Button
     private lateinit var cancelButton: Button
+    
+    // Store selected reminders
+    private val selectedReminders = mutableListOf<Pair<String, Int>>()
+    
+    companion object {
+        private const val CALENDAR_PERMISSION_REQUEST_CODE = 100
+    }
 
     // Color views
     private lateinit var colorRed: View
@@ -48,6 +64,9 @@ class EventFormActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.event_form_temp)
+
+        // Initialize calendar helper
+        calendarHelper = CalendarHelper(this)
 
         // Initialize views
         initViews()
@@ -129,6 +148,7 @@ class EventFormActivity : AppCompatActivity() {
         eventEndTime = findViewById(R.id.event_end_time)
         allDaySwitch = findViewById(R.id.all_day_switch)
         eventReminder = findViewById(R.id.event_reminder)
+        remindersContainer = findViewById(R.id.reminders_container)
         saveButton = findViewById(R.id.save_button)
         cancelButton = findViewById(R.id.cancel_button)
 
@@ -189,7 +209,6 @@ class EventFormActivity : AppCompatActivity() {
 
     private fun setupReminderDropdown() {
         val reminderOptions = arrayOf(
-            "None",
             "At time of event",
             "5 minutes before",
             "10 minutes before",
@@ -200,6 +219,70 @@ class EventFormActivity : AppCompatActivity() {
         )
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, reminderOptions)
         eventReminder.setAdapter(adapter)
+        
+        // Handle reminder selection
+        eventReminder.setOnItemClickListener { _, _, position, _ ->
+            val selectedText = reminderOptions[position]
+            val minutes = parseReminderText(selectedText)
+            addReminder(selectedText, minutes)
+            eventReminder.setText("") // Clear selection
+        }
+    }
+    
+    /**
+     * Add a reminder to the selected list
+     */
+    private fun addReminder(text: String, minutes: Int) {
+        // Check if reminder already exists
+        if (selectedReminders.any { it.second == minutes }) {
+            Toast.makeText(this, "Reminder already added", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        selectedReminders.add(Pair(text, minutes))
+        displayReminders()
+    }
+    
+    /**
+     * Display all selected reminders as chips
+     */
+    private fun displayReminders() {
+        remindersContainer.removeAllViews()
+        
+        selectedReminders.forEach { (text, minutes) ->
+            val chip = Chip(this).apply {
+                this.text = text
+                isCloseIconVisible = true
+                setOnCloseIconClickListener {
+                    removeReminder(minutes)
+                }
+            }
+            remindersContainer.addView(chip)
+        }
+    }
+    
+    /**
+     * Remove a reminder from the list
+     */
+    private fun removeReminder(minutes: Int) {
+        selectedReminders.removeAll { it.second == minutes }
+        displayReminders()
+    }
+    
+    /**
+     * Parse reminder text to minutes
+     */
+    private fun parseReminderText(reminderText: String): Int {
+        return when (reminderText) {
+            "At time of event" -> 0
+            "5 minutes before" -> 5
+            "10 minutes before" -> 10
+            "15 minutes before" -> 15
+            "30 minutes before" -> 30
+            "1 hour before" -> 60
+            "1 day before" -> 1440
+            else -> -1
+        }
     }
 
     private fun showDatePicker() {
@@ -269,6 +352,12 @@ class EventFormActivity : AppCompatActivity() {
             Toast.makeText(this, "Please select a date", Toast.LENGTH_SHORT).show()
             return
         }
+        
+        // Check calendar permissions
+        if (!calendarHelper.hasCalendarPermissions()) {
+            requestCalendarPermissions()
+            return
+        }
 
         try {
             // Build structured date/time
@@ -318,25 +407,72 @@ class EventFormActivity : AppCompatActivity() {
                 )
             }
 
-            // Parse reminder
-            val reminderMinutes = calendarFormatter.parseReminderText(eventReminder.text.toString())
+            // Convert selected reminders to CalendarHelper.Reminder objects
+            val reminders = selectedReminders.map { (_, minutes) ->
+                CalendarHelper.Reminder(
+                    minutes = minutes,
+                    method = android.provider.CalendarContract.Reminders.METHOD_ALERT
+                )
+            }
 
-            // Create calendar intent using formatter
-            val intent = calendarFormatter.createCalendarIntent(
+            // Insert event with reminders using CalendarHelper
+            val result = calendarHelper.insertEvent(
                 title = eventTitle.text.toString(),
                 description = eventDescription.text.toString(),
                 location = eventLocation.text.toString(),
                 structuredDateTime = structuredDateTime,
-                reminderMinutes = reminderMinutes
+                reminders = reminders
             )
 
-            startActivity(intent)
-            Toast.makeText(this, "Opening calendar app...", Toast.LENGTH_SHORT).show()
-            finish()
+            if (result.success) {
+                Toast.makeText(this, result.message, Toast.LENGTH_LONG).show()
+                finish()
+            } else {
+                Toast.makeText(this, "Error: ${result.message}", Toast.LENGTH_LONG).show()
+            }
 
         } catch (e: Exception) {
             Log.e("EventFormActivity", "Error saving event", e)
             Toast.makeText(this, "Error saving event: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+    
+    /**
+     * Request calendar permissions
+     */
+    private fun requestCalendarPermissions() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(
+                Manifest.permission.READ_CALENDAR,
+                Manifest.permission.WRITE_CALENDAR
+            ),
+            CALENDAR_PERMISSION_REQUEST_CODE
+        )
+    }
+    
+    /**
+     * Handle permission request result
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        
+        if (requestCode == CALENDAR_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && 
+                grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                // Permissions granted, try saving again
+                saveEventToCalendar()
+            } else {
+                Toast.makeText(
+                    this,
+                    "Calendar permissions are required to save events",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 }

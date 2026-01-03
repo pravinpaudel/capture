@@ -244,12 +244,21 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Reminders Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="Reminders"
+            android:textSize="12sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <!-- Reminder dropdown for adding new reminders -->
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/reminderInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="Reminder"
+            android:hint="Add reminder"
             style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
             app:boxBackgroundColor="@android:color/transparent">
 
@@ -260,10 +269,19 @@
                 android:inputType="none"
                 android:textSize="14sp"
                 android:textColor="?attr/colorOnSurface"
-                android:text="30 minutes before"
-                tools:text="30 minutes before" />
+                tools:text="Select reminder" />
 
         </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Container for displaying selected reminders -->
+        <LinearLayout
+            android:id="@+id/reminders_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp">
+            <!-- Selected reminders will be added here dynamically -->
+        </LinearLayout>
 
         <!-- Color Selection -->
         <TextView
