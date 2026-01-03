@@ -1,10 +1,15 @@
 package com.example.capture
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
+import android.view.MotionEvent
 import android.view.ScaleGestureDetector
+import android.view.View
+import android.widget.ImageView
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraControl
 import androidx.camera.core.CameraSelector
@@ -42,10 +47,12 @@ class CameraManager(
     /**
      * Initialize and start the camera with preview.
      * @param previewView The PreviewView to display camera feed
+     * @param focusIndicator The ImageView to show focus animation
      * @param onError Callback when camera initialization fails
      */
     fun startCamera(
         previewView: PreviewView,
+        focusIndicator: ImageView,
         onError: (Exception) -> Unit
     ) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
@@ -83,8 +90,8 @@ class CameraManager(
                 // Get camera control for zoom
                 cameraControl = camera?.cameraControl
 
-                // Setup tap-to-focus
-                setupTapToFocus(previewView)
+                // Setup tap-to-focus with indicator
+                setupTapToFocus(previewView, focusIndicator)
 
             } catch (e: Exception) {
                 Log.e(TAG, "Camera initialization failed", e)
@@ -120,22 +127,74 @@ class CameraManager(
                 }
             })
 
-        previewView.setOnTouchListener { _, event ->
+        previewView.setOnTouchListener { view, event ->
             scaleGestureDetector.onTouchEvent(event)
-            true
+            // Return false to allow tap-to-focus to work
+            false
         }
     }
 
     /**
-     * Setup tap-to-focus on the preview view.
+     * Setup tap-to-focus on the preview view with visual indicator.
      */
-    private fun setupTapToFocus(previewView: PreviewView) {
-        previewView.setOnClickListener { view ->
-            val factory = previewView.meteringPointFactory
-            val point = factory.createPoint(view.width / 2f, view.height / 2f)
-            val action = FocusMeteringAction.Builder(point).build()
-            cameraControl?.startFocusAndMetering(action)
+    private fun setupTapToFocus(previewView: PreviewView, focusIndicator: ImageView) {
+        previewView.setOnTouchListener { view, event ->
+            if (event.action == MotionEvent.ACTION_DOWN && !scaleGestureDetector.isInProgress) {
+                // Get tap coordinates
+                val x = event.x
+                val y = event.y
+                
+                // Position focus indicator at tap location
+                focusIndicator.x = x - focusIndicator.width / 2
+                focusIndicator.y = y - focusIndicator.height / 2
+                
+                // Show focus indicator with animation
+                showFocusIndicator(focusIndicator)
+                
+                // Trigger camera focus
+                val factory = previewView.meteringPointFactory
+                val point = factory.createPoint(x, y)
+                val action = FocusMeteringAction.Builder(point).build()
+                cameraControl?.startFocusAndMetering(action)
+                
+                return@setOnTouchListener true
+            }
+            scaleGestureDetector.onTouchEvent(event)
         }
+    }
+    
+    /**
+     * Show focus indicator with fade animation
+     */
+    private fun showFocusIndicator(focusIndicator: ImageView) {
+        focusIndicator.visibility = View.VISIBLE
+        focusIndicator.alpha = 0f
+        focusIndicator.scaleX = 1.5f
+        focusIndicator.scaleY = 1.5f
+        
+        // Fade in and scale down
+        focusIndicator.animate()
+            .alpha(1f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(200)
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    // Hold for a moment, then fade out
+                    focusIndicator.postDelayed({
+                        focusIndicator.animate()
+                            .alpha(0f)
+                            .setDuration(300)
+                            .setListener(object : AnimatorListenerAdapter() {
+                                override fun onAnimationEnd(animation: Animator) {
+                                    focusIndicator.visibility = View.GONE
+                                }
+                            })
+                            .start()
+                    }, 800)
+                }
+            })
+            .start()
     }
 
     /**

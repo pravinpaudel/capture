@@ -184,8 +184,8 @@
                 android:id="@+id/all_day_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:thumbTint="?attr/colorPrimary"
-                app:trackTint="?attr/colorPrimary" />
+                app:thumbTint="@color/switch_thumb_color"
+                app:trackTint="@color/switch_track_color" />
 
         </LinearLayout>
 
@@ -361,29 +361,45 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="24dp"
             android:orientation="horizontal"
-            android:gravity="end">
+            android:gravity="center">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/cancel_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
                 android:text="Cancel"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:textColor="#F44336"
-                app:iconTint="#F44336"
-                android:layout_marginEnd="8dp" />
+                android:textSize="15sp"
+                android:textAllCaps="false"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:strokeColor="?attr/colorPrimary"
+                app:strokeWidth="1.5dp"
+                android:textColor="?attr/colorPrimary"
+                app:iconTint="?attr/colorPrimary"
+                app:cornerRadius="12dp"
+                app:icon="@android:drawable/ic_menu_close_clear_cancel"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/save_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Save Event"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="Add to Calendar"
+                android:textSize="15sp"
+                android:textAllCaps="false"
                 style="@style/Widget.MaterialComponents.Button"
                 android:backgroundTint="?attr/colorPrimary"
-                app:cornerRadius="20dp"
-                android:minWidth="140dp" />
+                app:cornerRadius="12dp"
+                app:elevation="4dp"
+                app:icon="@android:drawable/ic_menu_save"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
 
         </LinearLayout>
 

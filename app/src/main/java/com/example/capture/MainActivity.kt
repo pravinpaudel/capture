@@ -3,6 +3,7 @@ package com.example.capture
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -32,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cameraPreview: PreviewView
     private lateinit var captureButton: FloatingActionButton
     private lateinit var galleryButton: FloatingActionButton
+    private lateinit var focusIndicator: ImageView
     private var progressDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         cameraPreview = findViewById(R.id.camera_preview)
         captureButton = findViewById(R.id.capture_button)
         galleryButton = findViewById(R.id.gallery_button)
+        focusIndicator = findViewById(R.id.focus_indicator)
     }
 
     /**
@@ -110,6 +113,7 @@ class MainActivity : AppCompatActivity() {
     private fun startCamera() {
         cameraManager.startCamera(
             previewView = cameraPreview,
+            focusIndicator = focusIndicator,
             onError = { error ->
                 showError("Failed to start camera: ${error.message}")
             }

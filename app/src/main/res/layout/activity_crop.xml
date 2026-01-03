@@ -46,9 +46,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#000000ff"
+        android:background="#CC000000"
         android:padding="16dp"
-        android:gravity="end"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:gravity="center"
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -57,29 +59,41 @@
         <!-- Cancel Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
             android:layout_marginEnd="8dp"
             android:text="Cancel"
-            android:textSize="14sp"
-            android:textColor="#F44336"
+            android:textSize="15sp"
+            android:textColor="@color/white"
             android:textAllCaps="false"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            app:rippleColor="#40F44336"
-            app:cornerRadius="8dp" />
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="@color/white"
+            app:strokeWidth="1.5dp"
+            app:rippleColor="#40FFFFFF"
+            app:cornerRadius="12dp"
+            app:icon="@android:drawable/ic_menu_close_clear_cancel"
+            app:iconTint="@color/white"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp" />
 
-        <!-- Add Event Button -->
+        <!-- Continue Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCrop"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
             android:text="Continue"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:textAllCaps="false"
-            android:minWidth="120dp"
             style="@style/Widget.MaterialComponents.Button"
             android:backgroundTint="?attr/colorPrimary"
-            app:cornerRadius="8dp" />
+            app:cornerRadius="12dp"
+            app:elevation="4dp"
+            app:icon="@android:drawable/ic_menu_send"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp" />
 
     </LinearLayout>
 

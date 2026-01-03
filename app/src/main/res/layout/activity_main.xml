@@ -18,6 +18,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Focus Indicator (shown when user taps to focus) -->
+    <ImageView
+        android:id="@+id/focus_indicator"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="Focus indicator"
+        android:src="@drawable/focus_indicator"
+        android:visibility="gone"
+        android:alpha="0"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Center Reticle/Targeting Frame -->
     <ImageView
         android:id="@+id/camera_reticle"
